@@ -143,10 +143,12 @@ test('every documented default is a real default, and every flag reaches the ana
     ],
   }), 'utf8')
 
-  // The document passes cleanly on the defaults, so every finding below is
-  // produced by the flag under test and by nothing else.
+  // The document passes cleanly on the defaults -- nothing but information --
+  // so every finding below is produced by the flag under test and nothing else.
   const clean = await execFileAsync(process.execPath, [cli, '--spec', path, '--json'], { cwd: projectDirectory })
-  assert.deepEqual(JSON.parse(clean.stdout).findings, [])
+  const before = JSON.parse(clean.stdout)
+  assert.equal(before.status, 'pass')
+  assert.equal(before.findings.every((finding) => finding.severity === 'info'), true)
 
   // Each flag is given a value the document exceeds. A flag that never reached
   // the analysis would leave the default in force and the finding absent.

@@ -77,6 +77,7 @@ export const RULE_SEVERITY = Object.freeze({
   'capability-id-invalid': 'error',
   'capability-malformed': 'error',
   'capability-unclaimed': 'warning',
+  'capability-unsupported-everywhere': 'info',
   'claim-contradicted': 'error',
   'claim-malformed': 'error',
   'claim-state-unknown': 'error',

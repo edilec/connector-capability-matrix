@@ -124,6 +124,26 @@ export function buildMatrix(spec, record) {
     }
   })
 
+  /**
+   * A capability every connector declares unsupported.
+   *
+   * This is information, not a defect: it is the most actionable thing a
+   * comparison says -- nothing in the catalog does this, so a workflow that
+   * needs it needs a new connector. It is reported only when every cell in the
+   * column is an explicit `unsupported`; if any cell is `unverified` the column
+   * is not evidence of anything, and the run is incomplete for that reason
+   * instead.
+   */
+  for (const column of columns) {
+    if (rows.length === 0 || column.unsupported !== rows.length) continue
+    record({
+      ruleId: 'capability-unsupported-everywhere',
+      pointer: `/capabilities/${column.id}`,
+      message: `Every one of the ${rows.length} connector(s) in this matrix declares capability "${column.id}" unsupported, so nothing here provides it.`,
+      suggestion: 'Nothing to fix in the specification; a workflow that needs this capability needs a connector that has it.',
+    })
+  }
+
   return {
     capabilities: columns,
     connectors: rows,

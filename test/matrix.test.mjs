@@ -62,7 +62,11 @@ test('an unsupported capability keeps an explicit cell rather than a blank', () 
   assert.equal(cellOf(result).state, 'unsupported')
   assert.equal(cellOf(result).claim, 'unsupported')
   assert.equal(cellOf(result).note, 'no endpoint exists')
-  assert.deepEqual(ruleIds(result), [])
+  // The only thing said about it is the information that nothing in this
+  // matrix provides the capability, which is not a defect and does not fail.
+  assert.deepEqual(ruleIds(result), ['capability-unsupported-everywhere'])
+  assert.equal(result.report.summary.info, 1)
+  assert.equal(result.report.summary.errors, 0)
   assert.equal(result.report.status, 'pass')
   assert.equal(result.report.summary.unsupported, 1)
 })
@@ -70,7 +74,8 @@ test('an unsupported capability keeps an explicit cell rather than a blank', () 
 test('evidence outranks the claim in both directions, and the disagreement is an error', () => {
   const contradicted = run(document({ claim: 'supported', observations: ['unsupported'] }))
   assert.equal(cellOf(contradicted).state, 'unsupported')
-  assert.deepEqual(ruleIds(contradicted), ['claim-contradicted'])
+  assert.deepEqual(ruleIds(contradicted), ['capability-unsupported-everywhere', 'claim-contradicted'])
+  assert.equal(contradicted.report.summary.errors, 1)
   assert.equal(contradicted.report.status, 'fail')
 
   const stale = run(document({ claim: 'unsupported', observations: ['supported'] }))
