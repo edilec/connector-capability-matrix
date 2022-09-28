@@ -93,6 +93,25 @@ test('the README states the size of the catalog, and states it right', async () 
   assert.equal(Number(limits[1]), Object.keys(DEFAULT_LIMITS).length)
 })
 
+test('the README\'s summary of what the tool checks accounts for every rule', () => {
+  // The table names some rules and counts the rest. Both halves drift, and a
+  // drifting count is exactly the kind of claim nobody notices is wrong: this
+  // one said "14 rules" for a group of twenty-two.
+  return readProjectFile('README.md').then((text) => {
+    const section = text.slice(text.indexOf('## What it checks'), text.indexOf('| Catalog | Size |'))
+    assert.equal(section.length > 200, true, 'the README no longer has a "What it checks" table')
+    const named = new Set(
+      [...section.matchAll(/`([a-z0-9-]+)`/g)].map((match) => match[1]).filter((id) => Object.hasOwn(RULE_SEVERITY, id)),
+    )
+    const counted = [...section.matchAll(/\| (\d+) rules \|/g)].reduce((total, match) => total + Number(match[1]), 0)
+    assert.equal(
+      named.size + counted,
+      Object.keys(RULE_SEVERITY).length,
+      `the README accounts for ${named.size} named and ${counted} counted rules, of ${Object.keys(RULE_SEVERITY).length}`,
+    )
+  })
+})
+
 test('every rule the source emits is in the severity table', async () => {
   const sources = await Promise.all(SOURCE_FILES.map((path) => readProjectFile(path)))
   const text = sources.join('\n')

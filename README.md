@@ -153,9 +153,11 @@ throws; everything that is a fact about the document is a finding instead.
 | A capability the connector says nothing about | `capability-unclaimed` |
 | A capability no connector in the matrix provides | `capability-unsupported-everywhere` |
 | A connector that declares no rate limit | `rate-limit-undeclared` |
-| A claim, observation or declaration that could not be read | 14 rules |
+| Evidence for a cell the specification says nothing about | `observation-unclaimed` |
+| A claim, observation or declaration that could not be read | 22 rules |
+| A document that declares nothing to compare | 2 rules |
 | A document in an unsupported dialect | `schema-version-unsupported` |
-| A bound that was reached | 6 rules |
+| A bound that was reached | 7 rules |
 
 | Catalog | Size |
 | --- | --- |

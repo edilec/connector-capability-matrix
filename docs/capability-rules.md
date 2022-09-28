@@ -99,6 +99,9 @@ never read partially and never treated as satisfied.
 - Every key is checked. A key this dialect does not define is reported, because
   a one-character typo that falls back to a default is a real failure reported
   as a green run.
+- Free text is bounded as well as sanitised: a `matrix` label is at most 100
+  characters, a `title` or a `note` at most 400, and an evidence `reference` at
+  most 200. A string over its bound is reported rather than silently trimmed.
 
 ## Rules
 
