@@ -128,6 +128,51 @@ test('maxMillis: a budget that is not spent changes nothing, and one that is sto
   assert.deepEqual(spent.report.findings.map((finding) => finding.ruleId), ['time-budget-exceeded'])
 })
 
+test('maxMillis: a budget the comparison really spends stops the real command line', async (t) => {
+  // A budget of zero is spent before any work begins, so a clock stuck at a
+  // constant satisfies it too: 0 - 0 >= 0. Only a budget the work genuinely
+  // outlives can tell a wired clock from a constant, so this case runs a
+  // document at the default bounds -- 100 connectors x 200 capabilities, every
+  // cell claimed -- against one millisecond and against an ample budget. The
+  // CLI passes `performance.now`; replace it with a constant and the first run
+  // below reports a pass.
+  const directory = await mkdtemp(join(tmpdir(), 'connector-matrix-clock-'))
+  t.after(() => rm(directory, { recursive: true, force: true }))
+  const path = join(directory, 'connectors.json')
+  const claims = Object.fromEntries(Array.from({ length: 200 }, (_, index) => [`cap-${index}`, 'unsupported']))
+  await writeFile(path, JSON.stringify({
+    schemaVersion: '1',
+    capabilities: Array.from({ length: 200 }, (_, index) => capability(index)),
+    connectors: Array.from({ length: 100 }, (_, index) => ({ ...connector(index), capabilities: claims })),
+  }), 'utf8')
+
+  const budgeted = (millis) => execFileAsync(
+    process.execPath,
+    [cli, '--spec', path, '--json', '--max-millis', String(millis)],
+    { cwd: projectDirectory },
+  ).then((ok) => ({ code: 0, ...ok }), (error) => ({ code: error.code, stdout: error.stdout }))
+
+  const spent = await budgeted(1)
+  const spentReport = JSON.parse(spent.stdout)
+  assert.equal(
+    spentReport.findings.some((finding) => finding.ruleId === 'time-budget-exceeded'),
+    true,
+    `a one millisecond budget was not enforced; the run reported ${JSON.stringify([...new Set(spentReport.findings.map((finding) => finding.ruleId))])}`,
+  )
+  assert.equal(spentReport.status, 'incomplete')
+  assert.equal(spent.code, 2)
+
+  const ample = await budgeted(60000)
+  const ampleReport = JSON.parse(ample.stdout)
+  assert.equal(
+    ampleReport.findings.some((finding) => finding.ruleId === 'time-budget-exceeded'),
+    false,
+    'an ample budget reported itself spent, so the budget is not being measured',
+  )
+  assert.equal(ampleReport.status, 'pass')
+  assert.equal(ample.code, 0)
+})
+
 test('every documented default is a real default, and every flag reaches the analysis', async (t) => {
   const directory = await mkdtemp(join(tmpdir(), 'connector-matrix-limits-'))
   t.after(() => rm(directory, { recursive: true, force: true }))

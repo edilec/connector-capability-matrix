@@ -187,7 +187,9 @@ async function main(argv) {
       limits,
       // The clock the documented time budget is measured with. Wiring it here
       // is the difference between a limit that is enforced and one that is
-      // merely written down.
+      // merely written down -- and a constant passed here would still satisfy
+      // --max-millis 0, so the case that holds this line is the nonzero budget
+      // in test/limits.test.mjs.
       clock: () => performance.now(),
     })
     report = result.report

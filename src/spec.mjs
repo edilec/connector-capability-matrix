@@ -33,8 +33,10 @@ export const SPEC_SCHEMA_VERSION = '1'
  * shorter matrix, and never a pass.
  *
  * `maxMillis` is the only limit that may be zero: a budget of zero is spent
- * before any work is done, which is how the CLI's clock wiring is proved
- * rather than assumed.
+ * before any work is done, so it is the one budget whose effect needs no
+ * fixture at all. It says nothing about whether a real clock is wired in,
+ * though -- only a budget the work outlives can, which is what the nonzero
+ * case in `test/limits.test.mjs` runs.
  */
 export const DEFAULT_LIMITS = Object.freeze({
   maxBytes: 1048576,

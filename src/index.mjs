@@ -220,8 +220,13 @@ export function compareFindingRows(left, right) {
  * `performance.now()` is a monotonic counter, not a wall clock, and the elapsed
  * value never reaches the report: the only thing it can change is whether the
  * budget was spent. A test injects its own clock to pin where the budget is
- * checked, and a budget of zero is spent before any work is done, which is how
- * the CLI's wiring is proved rather than assumed.
+ * checked.
+ *
+ * A budget of zero proves nothing about the *CLI's* wiring: zero is spent
+ * before any work begins, so a clock stuck at a constant satisfies it too --
+ * `0 - 0 >= 0`. What pins the wiring is a nonzero budget the work genuinely
+ * outlives, which `test/limits.test.mjs` runs over a document at the default
+ * bounds; replace the CLI's clock with a constant and that run reports a pass.
  */
 function createDeadline(clock, maxMillis) {
   const started = clock()
