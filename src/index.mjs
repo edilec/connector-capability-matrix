@@ -176,10 +176,31 @@ export const INCOMPLETE_RULES = Object.freeze([
 const INCOMPLETE = new Set(INCOMPLETE_RULES)
 const ALLOWED_OPTIONS = Object.freeze(['bytes', 'clock', 'limits', 'source'])
 
+/**
+ * The severity of one rule, or a throw.
+ *
+ * A rule with no entry in the table is a programming error, not a finding with
+ * a missing severity: the errors and warnings counts would silently drop it and
+ * `JSON.stringify` would omit the field, so a new rule added without a table
+ * entry would reach a report as a finding nobody could triage. Membership is
+ * asked with `Object.hasOwn`, because an index lookup answers for `toString`
+ * and `constructor` too and would hand back a function as a severity.
+ *
+ * Exported so the guard can be exercised directly. Every id this tool emits is
+ * a literal that the table already covers, so no document can reach this throw;
+ * a test that could only drive it through a document would therefore be no test
+ * at all.
+ */
+export function severityOf(ruleId) {
+  if (!Object.hasOwn(RULE_SEVERITY, ruleId)) {
+    throw new TypeError(`No severity is declared for rule "${sanitize(String(ruleId), 60)}"`)
+  }
+  return RULE_SEVERITY[ruleId]
+}
+
 /** Every finding is built here, so severity has exactly one source. */
 function record(collector, row) {
-  const severity = RULE_SEVERITY[row.ruleId]
-  if (severity === undefined) throw new TypeError(`No severity is declared for rule "${row.ruleId}"`)
+  const severity = severityOf(row.ruleId)
   collector.rows.push({ ...row, severity, order: collector.rows.length })
   // One site, so "which rules make a run incomplete" is a list a test can
   // enumerate rather than a property scattered through the analysis.

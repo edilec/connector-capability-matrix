@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
-import { INCOMPLETE_RULES, RULE_SEVERITY } from '../src/index.mjs'
+import { INCOMPLETE_RULES, RULE_SEVERITY, severityOf } from '../src/index.mjs'
 import { DEFAULT_LIMITS } from '../src/spec.mjs'
 
 const projectDirectory = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -133,13 +133,27 @@ test('every rule in the table is one the source can actually emit', async () => 
   }
 })
 
-test('an unknown rule id throws rather than defaulting to a severity', async () => {
-  // The one property the frozen table has to have: a finding built for a rule
-  // nobody declared a severity for is a programming error, not a warning.
-  const text = await readProjectFile('src/index.mjs')
-  assert.match(text, /No severity is declared for rule/)
-  const { analyzeSpecification } = await import('../src/index.mjs')
-  assert.equal(typeof analyzeSpecification, 'function')
+test('an unknown rule id throws rather than defaulting to a severity', () => {
+  // The one property the frozen table has to have, exercised rather than
+  // grepped for: a finding built for a rule nobody declared a severity for is a
+  // programming error. Left to default, its severity would be `undefined`, the
+  // errors and warnings counts would drop it and `JSON.stringify` would omit
+  // the field, so it would reach a report as a finding nobody could triage.
+  //
+  // The previous version of this test read the source for the message string
+  // and asserted that an exported function was a function. Deleting the throw
+  // left it green.
+  assert.equal(severityOf('spec-not-json'), 'error')
+  assert.equal(severityOf('claim-unverified'), 'warning')
+  assert.throws(
+    () => severityOf('a-rule-nobody-declared'),
+    /No severity is declared for rule "a-rule-nobody-declared"/,
+  )
+  // An inherited property is not a declaration. An index lookup would hand back
+  // a function here and call the rule declared.
+  for (const inherited of ['toString', 'constructor', 'hasOwnProperty', '__proto__']) {
+    assert.throws(() => severityOf(inherited), /No severity is declared for rule/, inherited)
+  }
 })
 
 test('every documented limit is a real limit, and every real limit is documented', async () => {
