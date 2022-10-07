@@ -128,9 +128,13 @@ export const RULE_SEVERITY = Object.freeze({
  * driven through the real entry point in `test/incompleteness.test.mjs`;
  * removing one turns exactly one of those tests red.
  *
- * The three rules deliberately absent are the ones that state a fact rather
- * than a gap: `claim-contradicted`, `required-capability-unclaimed` and
- * `unsupported-capability-observed`.
+ * The rules deliberately absent are the ones that state a fact the run
+ * established rather than a gap in it. There are four:
+ * `claim-contradicted`, `required-capability-unclaimed` and
+ * `unsupported-capability-observed` are errors, so the run fails; and
+ * `capability-unsupported-everywhere` is information, so the run still passes.
+ * `test/severity-table.test.mjs` enumerates that set, and adding a fifth should
+ * be a decision rather than an accident.
  */
 export const INCOMPLETE_RULES = Object.freeze([
   'capability-group-unknown',

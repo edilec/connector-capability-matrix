@@ -114,13 +114,20 @@ from a JSON file, and a flag overrides the file. `--help` lists them all.
 | Code | Meaning | stdout |
 | ---: | --- | --- |
 | 0 | Every cell is a settled answer and no claim outran its evidence | the report |
-| 1 | The evidence contradicts the specification, or a required capability is unclaimed | the report |
+| 1 | Everything was read, and the evidence contradicts the specification or a required capability is unclaimed | the report |
 | 2 | Invalid usage or configuration | **empty** |
 | 2 | Evidence missing, unreadable or bounded out (`incomplete`) | the report |
 
 A configuration error produces no report because the run never had a subject. An
 input that could not be read produces one, with status `incomplete`, because a
 consumer needs to know which input was not read. `incomplete` is never a pass.
+
+**`incomplete` outranks `fail`.** A document that both contradicts itself and
+leaves a question unanswered exits 2, not 1, and its status is `incomplete`. The
+errors are still reported in full -- the precedence changes what the run is
+called, never what it says -- but a run that could not read all of the document
+does not get to claim its errors are the whole story. Exit 1 means everything
+was read and the specification is wrong.
 
 ## As a library
 

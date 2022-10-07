@@ -175,6 +175,16 @@ test('the shipped examples behave as the README says they do', async () => {
   const report = JSON.parse(broken.stdout)
   assert.equal(report.status, 'incomplete')
   assert.equal(report.summary.unverified > 0, true)
+  // `incomplete` outranks `fail`, which the documented exit-code table says and
+  // this document demonstrates: it carries a claim-contradicted -- an error
+  // that on its own is exit 1 -- alongside rules that mean a question went
+  // unanswered, and the run is called incomplete and exits 2. The errors are
+  // still all there; the precedence settles what the run is called, not what it
+  // says.
+  const rules = report.findings.map((finding) => finding.ruleId)
+  assert.equal(rules.includes('claim-contradicted'), true, 'the broken example no longer contradicts a claim')
+  assert.equal(rules.includes('observation-conflict'), true, 'the broken example no longer leaves a question unanswered')
+  assert.equal(report.summary.errors > 0, true)
   assert.equal(report.findings.every((finding) => finding.location.file === 'examples/broken-matrix.json'), true)
   // A location is never an absolute host path: a report is an artifact people
   // paste into issues and diff between machines.

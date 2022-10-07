@@ -213,6 +213,14 @@ report.
 | Code | Meaning | stdout |
 | ---: | --- | --- |
 | 0 | Every cell is a settled answer and no claim outran its evidence | the report |
-| 1 | The specification is contradicted by the evidence, or a required capability is unclaimed | the report |
+| 1 | Everything was read, and the specification is contradicted by the evidence or a required capability is unclaimed | the report |
 | 2 | Invalid usage or configuration | **empty** |
 | 2 | Evidence missing, unreadable or bounded out (`incomplete`) | the report |
+
+The three statuses are decided in that order of precedence: `incomplete` first,
+then `fail`, then `pass`. A document carrying both a `claim-contradicted` --
+which on its own is an error and exit 1 -- and any rule from the incomplete
+column is reported as `incomplete` and exits 2. Every finding is still in the
+report, with its own severity; what the precedence settles is only what the run
+as a whole is called, and a run that did not read all of its subject may not
+call itself a verdict. `examples/broken-matrix.json` is exactly that document.
