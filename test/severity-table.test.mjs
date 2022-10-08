@@ -143,8 +143,14 @@ test('an unknown rule id throws rather than defaulting to a severity', () => {
   // The previous version of this test read the source for the message string
   // and asserted that an exported function was a function. Deleting the throw
   // left it green.
-  assert.equal(severityOf('spec-not-json'), 'error')
-  assert.equal(severityOf('claim-unverified'), 'warning')
+  // Not a fourth copy of the severities: this states that severityOf hands back
+  // whatever the table declares, for every rule the table declares. A
+  // coordinated edit of the table and the docs moves this with them, which is
+  // the point -- the severities themselves are pinned behaviourally, in
+  // test/severity-behaviour.test.mjs.
+  for (const [ruleId, severity] of Object.entries(RULE_SEVERITY)) {
+    assert.equal(severityOf(ruleId), severity, ruleId)
+  }
   assert.throws(
     () => severityOf('a-rule-nobody-declared'),
     /No severity is declared for rule "a-rule-nobody-declared"/,
