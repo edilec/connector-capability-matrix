@@ -36,7 +36,7 @@ import {
   readSpecDocument,
   validateLimits,
 } from './spec.mjs'
-import { EXCERPT_LIMIT, LABEL_LIMIT, MESSAGE_LIMIT, byCodeUnit, decodeUtf8, sanitize } from './text.mjs'
+import { EXCERPT_LIMIT, LABEL_LIMIT, MESSAGE_LIMIT, byCodeUnit, decodeUtf8, parseFailureDetail, sanitize } from './text.mjs'
 
 export const TOOL_ID = 'connector-capability-matrix'
 export const REPORT_SCHEMA_VERSION = '1'
@@ -481,7 +481,7 @@ export async function readConfigFile(path) {
   try {
     parsed = JSON.parse(decoded.text)
   } catch (error) {
-    throw new TypeError(`the configuration is not valid JSON: ${sanitize(error.message, 120)}`)
+    throw new TypeError(`the configuration is not valid JSON: ${sanitize(parseFailureDetail(error), 120)}`)
   }
   if (!isRecord(parsed)) throw new TypeError('the configuration must be a JSON object')
   for (const key of Object.keys(parsed)) {
@@ -666,4 +666,4 @@ export {
   readSpecDocument,
   validateLimits,
 } from './spec.mjs'
-export { byCodeUnit, decodeUtf8, sanitize } from './text.mjs'
+export { byCodeUnit, decodeUtf8, parseFailureDetail, sanitize } from './text.mjs'

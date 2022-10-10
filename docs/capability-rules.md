@@ -147,7 +147,7 @@ than a gap in it: `claim-contradicted`, `required-capability-unclaimed`,
 | `required-capability-unclaimed` | error | no | A capability the catalog declares required is not claimed by this connector, either way, and was never observed. |
 | `schema-version-unsupported` | error | yes | The document is in a dialect this tool does not support. Nothing in it was compared. |
 | `spec-malformed` | error | yes | The document, or one of its top-level arrays, is not the shape the dialect requires. |
-| `spec-not-json` | error | yes | The document is not valid JSON. |
+| `spec-not-json` | error | yes | The document is not valid JSON. The evidence carries the position, line and column of the failure and never the text at it: V8 quotes the input back in its own parse message, so a document short enough to be nothing but a credential would otherwise be reproduced in full by its own error. |
 | `spec-not-utf8` | error | yes | The document is not valid UTF-8, decoded strictly. |
 | `spec-too-deep` | error | yes | The document nests deeper than `maxDepth`. |
 | `spec-too-large` | error | yes | The document is larger than `maxBytes`. It was not read at all. |

@@ -45,4 +45,18 @@ change and is recorded here.
 - Stable output: no clock reading, no absolute host path, no locale-dependent
   ordering, and byte-identical stdout for the same specification.
 
+### Fixed
+
+- A parse failure no longer quotes the document it failed on. V8 writes
+  `Unexpected token 'A', "AKIAIOSFODNN7EXAMPLE" is not valid JSON`, and
+  `spec-not-json` put that message straight into the report's `evidence` field
+  while `--config` put it on stderr, so a specification or a configuration short
+  enough to be nothing but a credential was reproduced in full. Sanitising never
+  helped: it cuts from the end and the quoted span is at the front.
+  `parseFailureDetail` keeps the position, line, column and offending token and
+  drops the input, and `test/parse-failure-redaction.test.mjs` drives the AWS
+  documentation placeholder through the real command line interface and asserts
+  it absent from stdout, from stderr and from every prefix down to eight
+  characters.
+
 No release has been published.

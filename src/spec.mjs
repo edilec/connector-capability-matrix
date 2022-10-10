@@ -10,7 +10,7 @@
  * question could not be answered" mark the whole run incomplete.
  */
 
-import { decodeUtf8, sanitize } from './text.mjs'
+import { decodeUtf8, parseFailureDetail, sanitize } from './text.mjs'
 
 /**
  * The one document dialect this tool supports.
@@ -178,7 +178,7 @@ export function readSpecDocument(bytes, limits) {
       ok: false,
       ruleId: 'spec-not-json',
       message: 'The specification is not valid JSON, so no connector in it was compared.',
-      evidence: String(error.message),
+      evidence: parseFailureDetail(error),
     }
   }
   if (!withinDepth(parsed, limits.maxDepth)) {
