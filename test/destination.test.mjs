@@ -55,11 +55,15 @@ test('a hard link to the specification is refused, though its path differs', asy
   assert.deepEqual(JSON.parse(await readFile(spec, 'utf8')), SPEC)
 })
 
-test('a symbolic link to the specification is refused', async (t) => {
+test('a symbolic link to the specification is refused, and refused unresolved', async (t) => {
   const { directory, spec } = await workspace(t)
   const soft = join(directory, 'link-to-connectors.json')
   await symlink(spec, soft)
-  await assert.rejects(() => resolveMatrixDestination(spec, soft), /must be written elsewhere/)
+  // Refused for being a link at all, before anything asks where it points:
+  // resolving it is the act that would have written through it. The message
+  // says so, which is how this case is told apart from the identity check.
+  await assert.rejects(() => resolveMatrixDestination(spec, soft), /is a symbolic link/)
+  assert.deepEqual(JSON.parse(await readFile(spec, 'utf8')), SPEC)
 })
 
 test('a legitimate destination under a symlinked directory is not refused', async (t) => {
