@@ -96,20 +96,28 @@ test('hole 1: a symbolic link aimed at a path that does not exist yet creates no
 
 test('hole 2: a symbolically linked parent does not widen the permitted root', async (t) => {
   const { root, outside, spec } = await workspace(t)
-  const escape = join(root, 'escape')
+  // The root is resolved up front so that the lexical test is the only thing
+  // that could let this destination through. On macOS the temporary directory
+  // is itself a symbolic link, and an unresolved root would refuse every
+  // destination for a reason that has nothing to do with this hole -- which
+  // would leave the hole untested while the test still passed.
+  const realRoot = await realpath(root)
+  const escape = join(realRoot, 'escape')
   await symlink(outside, escape)
   const destination = join(escape, 'matrix.json')
 
-  // The premise: the lexical test a prefix check makes says this destination
-  // is inside the root. It is not, which is why the parent is resolved first.
-  assert.equal(destination.startsWith(root + sep), true, 'the fixture does not exercise the lexical hole')
+  // The premise: a prefix check on the path the caller typed says this
+  // destination is inside the root. It is not, which is why the parent is
+  // resolved first and compared afterwards.
+  assert.equal(destination.startsWith(realRoot + sep), true, 'the fixture does not exercise the lexical hole')
 
   await assert.rejects(
-    () => assertWritableDestination(destination, { inputs: [spec], root, label: 'Matrix destination' }),
+    () => assertWritableDestination(destination, { inputs: [spec], root: realRoot, label: 'Matrix destination' }),
     /outside the permitted root/,
   )
+  // And the plain lexical escape, which a prefix check does catch, still is.
   await assert.rejects(
-    () => assertWritableDestination(join(root, '..', 'matrix.json'), { inputs: [spec], root, label: 'Matrix destination' }),
+    () => assertWritableDestination(join(realRoot, '..', 'matrix.json'), { inputs: [spec], root: realRoot, label: 'Matrix destination' }),
     /outside the permitted root/,
   )
   assert.equal(await exists(join(outside, 'matrix.json')), false)
@@ -160,9 +168,10 @@ test('the destinations that must stay allowed are still written', async (t) => {
 
 test('a root is a boundary, not a ban on links: a linked directory inside it is accepted', async (t) => {
   const { root, spec } = await workspace(t)
-  const real = join(root, 'reports')
+  const realRoot = await realpath(root)
+  const real = join(realRoot, 'reports')
   await mkdir(real)
-  const linked = join(root, 'reports-link')
+  const linked = join(realRoot, 'reports-link')
   await symlink(real, linked)
 
   // Reached through a symbolic link and still inside the root. Refusing this
@@ -170,13 +179,17 @@ test('a root is a boundary, not a ban on links: a linked directory inside it is 
   // itself a link -- the false refusal that makes a guard useless.
   const resolved = await assertWritableDestination(join(linked, 'matrix.json'), {
     inputs: [spec],
-    root,
+    root: realRoot,
     label: 'Matrix destination',
   })
-  assert.equal(resolved, join(await realpath(real), 'matrix.json'))
+  assert.equal(resolved, join(real, 'matrix.json'))
 
-  const plain = await assertWritableDestination(join(root, 'matrix.json'), { inputs: [spec], root, label: 'Matrix destination' })
-  assert.equal(plain, join(await realpath(root), 'matrix.json'))
+  const plain = await assertWritableDestination(join(realRoot, 'matrix.json'), {
+    inputs: [spec],
+    root: realRoot,
+    label: 'Matrix destination',
+  })
+  assert.equal(plain, join(realRoot, 'matrix.json'))
 })
 
 test('an overwrite of a previous output of this tool is still allowed', async (t) => {
