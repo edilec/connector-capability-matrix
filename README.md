@@ -105,6 +105,16 @@ matrix artifact -- every cell, its state, its claim and the evidence behind it:
 connector-capability-matrix --spec connectors.json --json --matrix build/capability-matrix.json
 ```
 
+The matrix destination is checked before the specification is read. A path is
+not the file it names, so three indirections are refused rather than followed: a
+symbolic link at the destination (refused unresolved -- resolving it is what
+would write through it), a parent directory whose link leaves the tree the
+output belongs in, and a hard link to a file this run reads, which shares no
+path with its input and is visible only as the same device and inode. Any of
+them is a configuration error: exit 2, nothing on stdout, nothing written. A new
+file, a file in a real subdirectory and a path whose parent directories do not
+exist yet are all written as asked.
+
 Every option is accepted once, an unknown option is refused rather than ignored,
 and every documented limit has a flag. `--config FILE` supplies the same limits
 from a JSON file, and a flag overrides the file. `--help` lists them all.
