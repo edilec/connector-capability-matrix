@@ -7,7 +7,7 @@ import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 
-import { assertWritableDestination, resolveMatrixDestination } from '../src/index.mjs'
+import { assertWritableDestination } from '../src/index.mjs'
 
 /**
  * The write guard, one case per hole.
