@@ -106,14 +106,25 @@ connector-capability-matrix --spec connectors.json --json --matrix build/capabil
 ```
 
 The matrix destination is checked before the specification is read. A path is
-not the file it names, so three indirections are refused rather than followed: a
-symbolic link at the destination (refused unresolved -- resolving it is what
-would write through it), a parent directory whose link leaves the tree the
-output belongs in, and a hard link to a file this run reads, which shares no
-path with its input and is visible only as the same device and inode. Any of
-them is a configuration error: exit 2, nothing on stdout, nothing written. A new
-file, a file in a real subdirectory and a path whose parent directories do not
-exist yet are all written as asked.
+not the file it names, so these are refused rather than followed: a symbolic
+link at the destination (refused unresolved -- resolving it is what would write
+through it, and a link aimed at a path that does not exist yet would otherwise
+create a file nobody named), a hard link to a file this run reads, which shares
+no path with its input and is visible only as the same device and inode, and a
+destination that exists and is not a regular file. Any of them is a
+configuration error: exit 2, nothing on stdout, nothing written. A new file, a
+file in a real subdirectory and a path whose parent directories do not exist yet
+are all written as asked.
+
+`--matrix` is confined to no root. It may legitimately name a build directory,
+the system temporary directory or anywhere else, so a **parent directory that is
+itself a symbolic link is followed** rather than refused, and the matrix lands
+wherever that link leads. The guard carries the check for that case -- it
+resolves the parent before comparing it with a permitted root, because a lexical
+prefix test passes for `root/link/out` where `link` leaves the root -- and an
+embedder that does confine the output passes a root for it to enforce, as
+`test/write-guard.test.mjs` does. This command line passes none, so at the
+command line: name a destination whose directories you control.
 
 Every option is accepted once, an unknown option is refused rather than ignored,
 and every documented limit has a flag. `--config FILE` supplies the same limits

@@ -34,10 +34,13 @@ Options:
   --spec FILE                  Connector specification to compare (required)
   --matrix FILE                Write the matrix artifact here. A destination
                                that is not the file it names is refused: a
-                               symbolic link, a path whose parent leaves the
-                               permitted tree, a directory, or any file this
-                               run reads -- including one reached by a hard
-                               link, which shares no path with its input
+                               symbolic link, a directory, or any file this run
+                               reads -- including one reached by a hard link,
+                               which shares no path with its input. The path is
+                               otherwise not confined to any root, so a parent
+                               directory that is itself a symbolic link is
+                               followed and the matrix lands wherever it leads.
+                               Name a destination whose directories you control
   --config FILE                JSON file of limit overrides: { "limits": {...} }
   --json                       Emit the machine-readable report on stdout
   --max-bytes N                Maximum specification size (default 1048576)
