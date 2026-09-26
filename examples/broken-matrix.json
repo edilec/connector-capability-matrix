@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1",
+  "matrix": "integration-platform (broken)",
+  "description": "The same comparison with every kind of gap this tool refuses to render as a blank.",
+  "capabilities": [
+    { "id": "list-records", "group": "operations", "title": "List records with a filter", "required": true },
+    { "id": "create-record", "group": "operations", "title": "Create one record", "required": true },
+    { "id": "oauth2-authorization-code", "group": "authentication", "title": "OAuth 2 authorization code with refresh", "required": true },
+    { "id": "cursor-pagination", "group": "pagination", "title": "Opaque cursor paging" },
+    { "id": "retry-after-honoured", "group": "rate-limit", "title": "Retry-After respected on 429" }
+  ],
+  "connectors": [
+    {
+      "id": "acme-crm",
+      "title": "Acme CRM",
+      "version": "2.4.0",
+      "rateLimit": { "requests": 120, "windowSeconds": 60, "retryAfterHonoured": true },
+      "capabilities": {
+        "list-records": "supported",
+        "create-record": "supported",
+        "oauth2-authorization-code": "supported",
+        "cursor-pagination": "supported",
+        "retry-after-honoured": "unsupported"
+      }
+    },
+    {
+      "id": "bolt-erp",
+      "title": "Bolt ERP",
+      "version": "1.11.2",
+      "capabilities": {
+        "list-records": "supported",
+        "create-record": { "state": "partial", "note": "Works for contacts, not for invoices." },
+        "cursor-pagination": "supported",
+        "retry-after-honoured": "supported"
+      }
+    },
+    {
+      "id": "cirrus-mail",
+      "title": "Cirrus Mail",
+      "version": "0.9.4",
+      "rateLimit": { "requests": 30, "windowSeconds": 1 },
+      "capabilities": {
+        "list-records": "supported",
+        "create-record": "unsupported",
+        "oauth2-authorization-code": "supported",
+        "cursor-pagination": "unsupported",
+        "retry-after-honoured": "supported",
+        "webhook-delivery": "supported"
+      }
+    }
+  ],
+  "observations": [
+    { "connector": "acme-crm", "capability": "list-records", "kind": "contract-test", "result": "supported", "reference": "test/acme/list-records.contract.mjs" },
+    { "connector": "acme-crm", "capability": "create-record", "kind": "contract-test", "result": "unsupported", "reference": "test/acme/create-record-403.contract.mjs" },
+    { "connector": "acme-crm", "capability": "cursor-pagination", "kind": "contract-test", "result": "inconclusive", "reference": "test/acme/cursor-paging-flaky.contract.mjs" },
+    { "connector": "bolt-erp", "capability": "list-records", "kind": "contract-test", "result": "supported", "reference": "test/bolt/list-records.contract.mjs" },
+    { "connector": "bolt-erp", "capability": "cursor-pagination", "kind": "contract-test", "result": "supported", "reference": "test/bolt/cursor-paging.contract.mjs" },
+    { "connector": "bolt-erp", "capability": "cursor-pagination", "kind": "manual-check", "result": "unsupported", "reference": "notes/bolt-cursor-resets.md" },
+    { "connector": "cirrus-mail", "capability": "create-record", "kind": "sandbox-run", "result": "supported", "reference": "runs/2026-02-12/cirrus-create-201.log" },
+    { "connector": "cirrus-mail", "capability": "oauth2-authorization-code", "kind": "sandbox-run", "result": "supported", "reference": "runs/2026-02-10/cirrus-oauth-refresh.log" },
+    { "connector": "cirrus-mail", "capability": "webhook-delivery", "kind": "manual-check", "result": "supported", "reference": "notes/cirrus-webhooks.md" }
+  ]
+}
