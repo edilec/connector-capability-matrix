@@ -38,10 +38,12 @@ in the document; what this tool decides is what that evidence is worth.
 ## Install
 
 ```sh
-npm install connector-capability-matrix
+npm install github:edilec/connector-capability-matrix
 ```
 
-Or run it without installing:
+This installs the public GitHub source; `connector-capability-matrix` is not published to npm.
+
+After installation, run:
 
 ```sh
 npx connector-capability-matrix --spec connectors.json
@@ -50,7 +52,7 @@ npx connector-capability-matrix --spec connectors.json
 ## Use
 
 ```sh
-connector-capability-matrix --spec examples/integration-platform.json
+npx connector-capability-matrix --spec examples/integration-platform.json
 ```
 
 ```
@@ -74,7 +76,7 @@ The number after a marker is how much evidence stands behind the cell. The same
 document with the gaps a real catalog has:
 
 ```sh
-connector-capability-matrix --spec examples/broken-matrix.json
+npx connector-capability-matrix --spec examples/broken-matrix.json
 ```
 
 ```
@@ -102,7 +104,7 @@ Add `--json` for the machine-readable report, and `--matrix FILE` to write the
 matrix artifact -- every cell, its state, its claim and the evidence behind it:
 
 ```sh
-connector-capability-matrix --spec connectors.json --json --matrix build/capability-matrix.json
+npx connector-capability-matrix --spec connectors.json --json --matrix build/capability-matrix.json
 ```
 
 The matrix destination is checked before the specification is read. A path is
