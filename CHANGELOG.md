@@ -7,7 +7,7 @@ All notable changes to this project are recorded here. The format follows
 Rule ids are part of the public interface: renaming or removing one is a breaking
 change and is recorded here.
 
-## [Unreleased]
+## [0.1.0] - 2026-10-14
 
 ### Added
 
@@ -73,4 +73,4 @@ change and is recorded here.
   it absent from stdout, from stderr and from every prefix down to eight
   characters.
 
-No release has been published.
+GitHub source release v0.1.0 — 2026-10-14.
